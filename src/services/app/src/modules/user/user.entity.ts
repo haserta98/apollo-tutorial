@@ -8,13 +8,13 @@ import {
 } from "typeorm"
 import {UserAddressEntity} from "./user-address.entity";
 
-@Entity()
+@Entity("users")
 export class UserEntity {
 
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({unique: true, nullable: false})
+  @Column()
   username: string;
 
   @Column()

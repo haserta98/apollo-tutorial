@@ -2,6 +2,9 @@ import {DataSource, Repository} from "typeorm";
 import {UserEntity} from "./user.entity";
 import {UserAddressEntity} from "./user-address.entity";
 import {inject, injectable} from "inversify";
+import LogGateway from "../../gateway/LogGateway";
+import Log from "../../../../../libs/domain/log";
+import LogBuilder from "../../../../../libs/log.builder";
 
 @injectable()
 class UserService {
@@ -9,7 +12,8 @@ class UserService {
   private readonly userRepository: Repository<UserEntity>;
   private readonly userAddressRepository: Repository<UserAddressEntity>;
 
-  constructor(@inject(DataSource) private readonly datasource: DataSource) {
+  constructor(@inject(DataSource) private readonly datasource: DataSource,
+              @inject(LogGateway) private readonly logGateway: LogGateway) {
     this.userRepository = this.datasource.getRepository(UserEntity);
     this.userAddressRepository = this.datasource.getRepository(UserAddressEntity);
   }
@@ -30,8 +34,19 @@ class UserService {
   }
 
   public async createUser(user: Partial<UserEntity>) {
-    const newUser = this.userRepository.create(user);
-    return await this.userRepository.save(newUser);
+    try {
+      const newUser = this.userRepository.create(user);
+      const savedUser = await this.userRepository.save(newUser);
+      const log: Log = LogBuilder.builder()
+        .withMessage("User created successfully.")
+        .withOwner("system")
+        .withType("User")
+        .build();
+      await this.logGateway.send(log);
+      return savedUser;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   public async createAddress(address: Partial<UserAddressEntity & { userId: string }>) {

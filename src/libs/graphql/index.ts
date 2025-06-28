@@ -1,12 +1,12 @@
-import UserResolver from "../modules/user/user.resolver";
+import UserResolver from "../../services/app/src/modules/user/user.resolver";
 import {ApolloServer} from "@apollo/server";
 import {generateSchema} from "./typedef";
-import {UserEntity} from "../modules/user/user.entity";
-import {UserAddressEntity} from "../modules/user/user-address.entity";
+import {UserEntity} from "../../services/app/src/modules/user/user.entity";
+import {UserAddressEntity} from "../../services/app/src/modules/user/user-address.entity";
 import {startStandaloneServer} from "@apollo/server/standalone";
-import UserMutation from "../modules/user/user.mutation";
+import UserMutation from "../../services/app/src/modules/user/user.mutation";
 import TypeDef from "./typedef_interface";
-import UserTypeDef from "../modules/user/user.typedef";
+import UserTypeDef from "../../services/app/src/modules/user/user.typedef";
 import {inject, injectable} from "inversify";
 
 @injectable()

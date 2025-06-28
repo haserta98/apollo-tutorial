@@ -1,4 +1,4 @@
-import TypeDef from "../../graphql/typedef_interface";
+import TypeDef from "../../../../../libs/graphql/typedef_interface";
 
 class UserTypeDef implements TypeDef {
   getTypeDefs(): string {
