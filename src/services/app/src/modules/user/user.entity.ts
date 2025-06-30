@@ -7,6 +7,7 @@ import {
   DeleteDateColumn, OneToMany
 } from "typeorm"
 import {UserAddressEntity} from "./user-address.entity";
+import {OrderEntity} from "../../../../../libs/domain/order";
 
 @Entity("users")
 export class UserEntity {
@@ -34,4 +35,7 @@ export class UserEntity {
 
   @OneToMany(() => UserAddressEntity, address => address.user)
   addresses: UserAddressEntity[]
+
+  @OneToMany(() => OrderEntity, order => order.user, {cascade: true})
+  orders: OrderEntity[]
 }

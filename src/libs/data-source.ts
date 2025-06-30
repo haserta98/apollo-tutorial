@@ -3,6 +3,7 @@ import {DataSource} from "typeorm"
 import {UserEntity} from "../services/app/src/modules/user/user.entity"
 import {UserAddressEntity} from "../services/app/src/modules/user/user-address.entity";
 import {LogEntity} from "./domain/log";
+import {OrderEntity, OrderItemEntity} from "./domain/order";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -16,7 +17,9 @@ export const AppDataSource = new DataSource({
   entities: [
     UserEntity,
     UserAddressEntity,
-    LogEntity
+    LogEntity,
+    OrderEntity,
+    OrderItemEntity
   ],
   migrations: [],
   subscribers: [],

@@ -1,5 +1,6 @@
 import * as amqp from "amqplib"
 import {injectable} from "inversify";
+import {logger} from "../logger";
 
 @injectable()
 class RMQClient {
@@ -11,7 +12,7 @@ class RMQClient {
 
   public async connect() {
     if (this.connection) {
-      console.warn("Already connected to RabbitMQ. Reusing existing connection.");
+      logger.warn("Already connected to RabbitMQ. Reusing existing connection.");
       return;
     }
     try {
@@ -22,9 +23,9 @@ class RMQClient {
           timeout: +process.env.RMQ_CLIENT_CONNECTION_TIMEOUT || 30000,
         }
       );
-      console.log("Connected to RabbitMQ");
+      logger.info("Connected to RabbitMQ");
     } catch (error) {
-      console.error("Failed to connect to RabbitMQ:", error);
+      logger.error("Failed to connect to RabbitMQ:", error);
       throw error;
     }
   }
