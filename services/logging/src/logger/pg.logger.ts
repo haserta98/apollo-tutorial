@@ -1,10 +1,10 @@
 import {DataSource} from "typeorm";
 import {inject, injectable} from "inversify";
-import {Logger} from "libs/src/common";
-import Log, {LogEntity} from "libs/src/domain/log";
+import {Logger} from "@ecommerce/libs/src/common";
+import Log, {LogEntity} from "@ecommerce/libs/src/domain/log";
 
 @injectable()
-class PgGateway implements Logger {
+class PgLogger implements Logger {
 
   constructor(@inject(DataSource) private datasource: DataSource) {
   }
@@ -18,4 +18,4 @@ class PgGateway implements Logger {
   }
 }
 
-export default PgGateway;
+export default PgLogger;

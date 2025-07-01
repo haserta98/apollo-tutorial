@@ -2,12 +2,11 @@ import {
   Column,
   CreateDateColumn, DeleteDateColumn,
   Entity,
-  ForeignKey,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn
 } from "typeorm";
-import {UserEntity} from "../entity/user.entity";
+import {UserEntity} from "./user.entity";
 
 @Entity("orders")
 export class OrderEntity {

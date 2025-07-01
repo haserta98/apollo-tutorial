@@ -2,8 +2,7 @@ import * as dotenv from "dotenv"
 import {DataSource} from "typeorm";
 import LogContainer from "./config/container";
 import LoggingBootstrapper from "./config/bootstrap";
-import LogProcessor from "./processor/processor";
-import {logger} from "libs/src/logger";
+import {logger} from "@ecommerce/libs/src/logger";
 
 class LoggingService {
 
@@ -11,7 +10,7 @@ class LoggingService {
   }
 
   async bootstrap() {
-    dotenv.config();
+    dotenv.config({debug:false});
     try {
       const datasource = LogContainer.getInstance().get(DataSource);
       await datasource.initialize();
@@ -25,15 +24,6 @@ class LoggingService {
       await bootstrapper.initialize();
     } catch (error) {
       logger.error("Error during Logging service initialization:", error)
-      return;
-    }
-
-    try {
-      const processor = LogContainer.getInstance().get(LogProcessor);
-      await processor.initialize();
-      logger.info("Log Processor has been initialized!");
-    } catch (e) {
-      logger.error("Error during Log Processor initialization:", e);
       return;
     }
   }

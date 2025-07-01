@@ -1,12 +1,14 @@
-import {Container as IOContainer, ContainerModule} from 'inversify';
+import {Container as IOContainer} from 'inversify';
 import {DataSource} from "typeorm";
 import UserService from "./modules/user/user.service";
 import UserMutation from "./modules/user/user.mutation";
 import UserResolver from "./modules/user/user.resolver";
-import LogGateway from "./gateway/LogGateway";
+import LogGateway from "./gateway/log.gateway";
 import GraphqlBootstrapper from "./graphql.bootstrap";
-import {AppDataSource} from "libs/src/data-source";
-import RMQClient from "libs/src/graphql/RMQClient";
+import {AppDataSource} from "@ecommerce/libs/src/data-source";
+import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import OrderGateway from "./gateway/order.gateway";
+import OrderResolver from "./modules/order/order.resolver";
 
 class IoContainer extends IOContainer {
 
@@ -22,11 +24,13 @@ class IoContainer extends IOContainer {
 
   private init() {
     this.bind(DataSource).toConstantValue(AppDataSource);
+    this.bind(RMQClient).toSelf();
     this.bind(GraphqlBootstrapper).toSelf()
     this.bind(UserService).toSelf()
     this.bind(UserMutation).toSelf()
     this.bind(UserResolver).toSelf()
-    this.bind(RMQClient).toSelf();
+    this.bind(OrderGateway).toSelf();
+    this.bind(OrderResolver).toSelf();
     this.bind(LogGateway).toSelf();
   }
 

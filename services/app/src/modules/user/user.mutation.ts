@@ -1,7 +1,7 @@
 import UserService from "./user.service";
 import {inject, injectable} from "inversify";
-import {UserEntity} from "libs/src/entity/user.entity";
-import {UserAddressEntity} from "libs/src/entity/user-address.entity";
+import {UserEntity} from "@ecommerce/libs/src/entity/user.entity";
+import {UserAddressEntity} from "@ecommerce/libs/src/entity/user-address.entity";
 
 @injectable()
 class UserMutation {

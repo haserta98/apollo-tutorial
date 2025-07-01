@@ -1,12 +1,12 @@
 import {Container as IOContainer} from 'inversify';
 import {DataSource} from "typeorm";
-import PgGateway from "../gateway/pg.gateway";
+import PgGateway from "../logger/pg.logger";
 import LoggingBootstrapper from "./bootstrap";
-import LogManager from "../manager/manager";
-import LogProcessor from "../processor/processor";
+import LogProcessor from "../processor/log.processor";
 import LogSubscriber from "../subscriber/subscriber";
-import {AppDataSource} from "libs/src/data-source";
-import RMQClient from "libs/src/graphql/RMQClient";
+import {AppDataSource} from "@ecommerce/libs/src/data-source";
+import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import LogManager from "../index/manager";
 
 class LogContainer extends IOContainer {
 

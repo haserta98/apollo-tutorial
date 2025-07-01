@@ -1,14 +1,14 @@
-import { Logger } from "libs/src/common";
-import PgGateway from "../gateway/pg.gateway";
+import { Logger } from "@ecommerce/libs/src/common";
+import PgLogger from "../logger/pg.logger";
 import {inject} from "inversify";
-import Log from "libs/src/domain/log";
+import Log from "@ecommerce/libs/src/domain/log";
 
 class LogManager {
 
   private readonly loggers: Logger[] = [];
 
-  constructor(@inject(PgGateway) gateway: PgGateway) {
-    this.loggers = [gateway];
+  constructor(@inject(PgLogger) logger: PgLogger) {
+    this.loggers = [logger];
   }
 
   async initialize() {

@@ -1,10 +1,10 @@
 import {DataSource, Repository} from "typeorm";
 import {inject, injectable} from "inversify";
-import LogGateway from "../../gateway/LogGateway";
-import {UserEntity} from "libs/src/entity/user.entity";
-import {UserAddressEntity} from "libs/src/entity/user-address.entity";
-import LogBuilder from "libs/src/log.builder";
-import Log from "libs/src/domain/log";
+import LogGateway from "../../gateway/log.gateway";
+import {UserEntity} from "@ecommerce/libs/src/entity/user.entity";
+import {UserAddressEntity} from "@ecommerce/libs/src/entity/user-address.entity";
+import LogBuilder from "@ecommerce/libs/src/log.builder";
+import Log from "@ecommerce/libs/src/domain/log";
 
 @injectable()
 class UserService {

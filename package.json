@@ -1,16 +1,22 @@
 {
-  "name": "ecommerce",
+  "name": "@ecommerce/main",
   "private": true,
   "workspaces": [
     "services/*",
     "libs/*"
   ],
+  "scripts": {
+    "start:log": "pnpm --filter @ecommerce/logging dev",
+    "start:app": "pnpm --filter @ecommerce/app dev",
+    "start:order": "pnpm --filter @ecommerce/order dev"
+  },
   "dependencies": {
     "inversify": "^7.0.0-alpha.5",
     "reflect-metadata": "^0.2.2",
     "amqplib": "^0.10.8",
     "winston": "^3.17.0",
-    "dotenv": "^17.0.0"
+    "dotenv": "^17.0.0",
+    "typeorm": "0.3.25"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",

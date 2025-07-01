@@ -7,7 +7,7 @@ import {
   DeleteDateColumn, OneToMany
 } from "typeorm"
 import {UserAddressEntity} from "./user-address.entity";
-import {OrderEntity} from "../domain/order";
+import {OrderEntity} from "./order";
 
 @Entity("users")
 export class UserEntity {

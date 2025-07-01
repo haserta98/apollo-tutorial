@@ -6,21 +6,26 @@ import {inject, injectable} from "inversify";
 import UserMutation from "./modules/user/user.mutation";
 import UserResolver from "./modules/user/user.resolver";
 import UserTypeDef from "./modules/user/user.typedef";
-import {UserEntity} from "libs/src/entity/user.entity";
-import {UserAddressEntity} from "libs/src/entity/user-address.entity";
+import {UserEntity} from "@ecommerce/libs/src/entity/user.entity";
+import {UserAddressEntity} from "@ecommerce/libs/src/entity/user-address.entity";
+import {logger} from "@ecommerce/libs/src/logger";
+import OrderTypeDef from "./modules/order/order.typedef";
+import OrderResolver from "./modules/order/order.resolver";
 
 @injectable()
 class GraphqlBootstrapper {
 
   constructor(@inject(UserResolver) private readonly userResolver: UserResolver,
               @inject(UserMutation) private readonly userMutation: UserMutation,
+              @inject(OrderResolver) private readonly orderResolver: OrderResolver,
   ) {
   }
 
   public async initialize() {
 
     const types: TypeDef[] = [
-      new UserTypeDef()
+      new UserTypeDef(),
+      new OrderTypeDef()
     ]
 
     const server = new ApolloServer({
@@ -29,6 +34,9 @@ class GraphqlBootstrapper {
         Query: {
           users: () => this.userResolver.resolveUsers(),
           user: (_, {id}) => this.userResolver.resolveUser(+id),
+          orders: (_, {userId}) => this.orderResolver.resolveOrders(+userId),
+          order: (_, {id}) => {
+          },
         },
         User: {
           addresses: (user: UserEntity) => this.userResolver.resolveUserAddress(user.id),
@@ -40,13 +48,16 @@ class GraphqlBootstrapper {
           createUser: (_: any, user: UserEntity) => this.userMutation.createUser(_, user),
           createAddress: (_: any, address: UserAddressEntity) => this.userMutation.createAddress(_, address),
           removeUser: (_: any, args) => this.userMutation.removeUser(_, +args.id),
+          createOrder: (_: any, order: any) => {
+
+          }
         }
       }
     });
     const {url} = await startStandaloneServer(server, {
       listen: {port: process.env.GRAPHQL_PORT ? +process.env.GRAPHQL_PORT : 4000},
     });
-    console.log(`GraphQL Server is running at ${url}`);
+    logger.info(`GraphQL Server is running at ${url}`);
   }
 }
 
