@@ -14,7 +14,7 @@ export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToMany(() => OrderItemEntity, orderItem => orderItem.order)
+  @OneToMany(() => OrderItemEntity, orderItem => orderItem.order, {cascade: true})
   items: OrderItemEntity[];
 
   @Column({type: "numeric", nullable: true, default: 0})

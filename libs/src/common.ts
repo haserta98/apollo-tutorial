@@ -3,6 +3,7 @@ import * as amqp from "amqplib";
 import {logger} from "./logger";
 import {IncomingMessage, IncomingMessageBuilder, SendingMessage} from "./domain/common";
 import RMQClient from "./graphql/RMQClient";
+import {QueueType, queueWithShard} from "./constants/Queue";
 
 export interface Bootable {
   initialize(): Promise<void>;
@@ -21,7 +22,7 @@ export interface Logger {
 export abstract class Subscriber<TPayload> implements Bootable {
 
   protected rmqClient: RMQClient;
-  protected QUEUE_NAME: string;
+  protected QUEUE_NAME: QueueType;
   protected readonly shardSize: number;
 
   protected constructor() {
@@ -36,7 +37,7 @@ export abstract class Subscriber<TPayload> implements Bootable {
 
   private async startShard(shard: number) {
     const channel = await this.rmqClient.getConnection().createChannel();
-    await channel.prefetch(10);
+    await channel.prefetch(5);
     const queueName = `${this.QUEUE_NAME}_${shard}`;
     await channel.assertQueue(queueName, {
       durable: false,

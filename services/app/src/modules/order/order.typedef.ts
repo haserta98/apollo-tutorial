@@ -37,6 +37,7 @@ class OrderTypeDef implements TypeDef {
     return `
       orders(userId: ID!): [Order!]!
       order(id: ID!): Order
+      orderItems(orderId: ID!): [OrderItem!]!
     `
   }
 

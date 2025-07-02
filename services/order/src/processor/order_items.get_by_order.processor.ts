@@ -1,26 +1,28 @@
 import {Processor} from "@ecommerce/libs/src/common";
-import {OrderEntity} from "@ecommerce/libs/src/entity/order";
+import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order";
 import {inject, injectable} from "inversify";
 import {DataSource} from "typeorm";
 import {IncomingMessage, SendingMessage} from "@ecommerce/libs/src/domain/common";
+import {SubQueueType} from "@ecommerce/libs/src/constants/Queue";
 
 @injectable()
-class OrderGetProcessor implements Processor<number> {
+class OrderItemsByOrderIdProcessor implements Processor<number> {
 
   constructor(@inject(DataSource) private readonly datasource: DataSource) {
   }
 
   async process(payload: IncomingMessage<number>): Promise<void> {
-    const orderRepository = this.datasource.getRepository(OrderEntity);
+    const orderRepository = this.datasource.getRepository(OrderItemEntity);
     const orders = await orderRepository.find({
       where: {
-        user: {
-          id: +payload.payload
-        }
+        order: {
+          id: payload.payload
+        },
       },
+      relations: ["order"]
     });
-    const sendingMessage: SendingMessage<OrderEntity[]> = {
-      type: "orders.get.by.user_id",
+    const sendingMessage: SendingMessage<OrderItemEntity[]> = {
+      type: SubQueueType.GET_ORDER_ITEMS_BY_ORDER_ID,
       payload: orders,
       key: payload.payload.toString()
     }
@@ -28,4 +30,4 @@ class OrderGetProcessor implements Processor<number> {
   }
 }
 
-export default OrderGetProcessor;
+export default OrderItemsByOrderIdProcessor;

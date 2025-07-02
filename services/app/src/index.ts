@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import {DataSource} from "typeorm";
 import * as dotenv from "dotenv"
-import LogGateway from "./gateway/log.gateway";
+import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 import IoContainer from "./container";
 import GraphqlBootstrapper from "./graphql.bootstrap";
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";

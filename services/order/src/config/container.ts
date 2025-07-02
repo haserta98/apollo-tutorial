@@ -4,7 +4,11 @@ import {AppDataSource} from "@ecommerce/libs/src/data-source";
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
 import OrderBootstrapper from "./bootstrap";
 import OrderSubscriber from "../subscriber/order.subscriber";
-import OrderGetProcessor from "../processor/order.get.processor";
+import OrderGetByUserProcessor from "../processor/order.get_by_user.processor";
+import OrderGetByIdProcessor from "../processor/order.get_by_id.processor";
+import OrderItemsByOrderIdProcessor from "../processor/order_items.get_by_order.processor";
+import OrderCreateProcessor from "../processor/order.create.processor";
+import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 
 class OrderContainer extends IOContainer {
 
@@ -23,7 +27,11 @@ class OrderContainer extends IOContainer {
     this.bind(RMQClient).toSelf();
     this.bind(OrderBootstrapper).toSelf();
     this.bind(OrderSubscriber).toSelf();
-    this.bind(OrderGetProcessor).toSelf();
+    this.bind(OrderGetByUserProcessor).toSelf();
+    this.bind(OrderGetByIdProcessor).toSelf();
+    this.bind(OrderItemsByOrderIdProcessor).toSelf();
+    this.bind(OrderCreateProcessor).toSelf();
+    this.bind(LogGateway).toSelf();
   }
 
   public static getInstance(): OrderContainer {

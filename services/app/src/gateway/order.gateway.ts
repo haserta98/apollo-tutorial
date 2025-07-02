@@ -1,8 +1,9 @@
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
 import {inject, injectable} from "inversify";
 import {QueueType, SubQueueType} from "@ecommerce/libs/src/constants/Queue";
-import {OrderEntity} from "@ecommerce/libs/src/entity/order";
+import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order";
 import {SendingMessage} from "@ecommerce/libs/src/domain/common";
+import {OrderCreateRequest} from "@ecommerce/libs/src/dto/order.dto";
 
 @injectable()
 class OrderGateway {
@@ -17,6 +18,45 @@ class OrderGateway {
       key: userId.toString()
     }
     const incoming = await this.client.sendAndWait<OrderEntity[]>(
+      QueueType.ORDER,
+      msg
+    )
+    return incoming.payload;
+  }
+
+  async getOrderItems(orderId: number): Promise<OrderItemEntity[]> {
+    const msg: SendingMessage<number> = {
+      type: SubQueueType.GET_ORDER_ITEMS_BY_ORDER_ID,
+      payload: orderId,
+      key: orderId.toString()
+    }
+    const incoming = await this.client.sendAndWait<OrderItemEntity[]>(
+      QueueType.ORDER,
+      msg
+    )
+    return incoming.payload;
+  }
+
+  async getOrder(orderId: number): Promise<OrderEntity> {
+    const msg: SendingMessage<number> = {
+      type: SubQueueType.GET_ORDER_BY_ID,
+      payload: orderId,
+      key: orderId.toString()
+    }
+    const incoming = await this.client.sendAndWait<OrderEntity>(
+      QueueType.ORDER,
+      msg
+    )
+    return incoming.payload;
+  }
+
+  async createOrder(order: OrderCreateRequest): Promise<number> {
+    const msg: SendingMessage<OrderCreateRequest> = {
+      type: SubQueueType.CREATE,
+      payload: order,
+      key: order.userId.toString()
+    }
+    const incoming = await this.client.sendAndWait<number>(
       QueueType.ORDER,
       msg
     )

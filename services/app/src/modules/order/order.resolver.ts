@@ -7,8 +7,16 @@ class OrderResolver {
   constructor(@inject(OrderGateway) private readonly gateway: OrderGateway) {
   }
 
-  resolveOrders = async (userId: number) => {
+  resolveOrders(userId: number) {
     return this.gateway.getOrders(userId);
+  }
+
+  resolveOrder(orderId: number) {
+    return this.gateway.getOrder(orderId);
+  }
+
+  resolveOrderItems(orderId: number) {
+    return this.gateway.getOrderItems(orderId);
   }
 
 }

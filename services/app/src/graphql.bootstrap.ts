@@ -11,6 +11,9 @@ import {UserAddressEntity} from "@ecommerce/libs/src/entity/user-address.entity"
 import {logger} from "@ecommerce/libs/src/logger";
 import OrderTypeDef from "./modules/order/order.typedef";
 import OrderResolver from "./modules/order/order.resolver";
+import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order";
+import {OrderCreateRequest} from "@ecommerce/libs/src/dto/order.dto";
+import OrderMutation from "./modules/order/order.mutation";
 
 @injectable()
 class GraphqlBootstrapper {
@@ -18,6 +21,7 @@ class GraphqlBootstrapper {
   constructor(@inject(UserResolver) private readonly userResolver: UserResolver,
               @inject(UserMutation) private readonly userMutation: UserMutation,
               @inject(OrderResolver) private readonly orderResolver: OrderResolver,
+              @inject(OrderMutation) private readonly orderMutation: OrderMutation
   ) {
   }
 
@@ -35,8 +39,8 @@ class GraphqlBootstrapper {
           users: () => this.userResolver.resolveUsers(),
           user: (_, {id}) => this.userResolver.resolveUser(+id),
           orders: (_, {userId}) => this.orderResolver.resolveOrders(+userId),
-          order: (_, {id}) => {
-          },
+          order: (_, {id}) => this.orderResolver.resolveOrder(+id),
+          orderItems: (_, {orderId}) => this.orderResolver.resolveOrderItems(+orderId),
         },
         User: {
           addresses: (user: UserEntity) => this.userResolver.resolveUserAddress(user.id),
@@ -44,13 +48,20 @@ class GraphqlBootstrapper {
         UserAddress: {
           user: (address: UserAddressEntity) => this.userResolver.resolveUser(address.user.id),
         },
+        Order: {
+          items: (order: OrderEntity) => this.orderResolver.resolveOrderItems(+order.id),
+          user: (order: OrderEntity) => this.userResolver.resolveUser(+order.user.id),
+        },
+        OrderItem: {
+          order: (item: OrderItemEntity, args) => {
+            return this.orderResolver.resolveOrder(+item.order.id);
+          },
+        },
         Mutation: {
           createUser: (_: any, user: UserEntity) => this.userMutation.createUser(_, user),
           createAddress: (_: any, address: UserAddressEntity) => this.userMutation.createAddress(_, address),
           removeUser: (_: any, args) => this.userMutation.removeUser(_, +args.id),
-          createOrder: (_: any, order: any) => {
-
-          }
+          createOrder: (_: any, order: OrderCreateRequest) => this.orderMutation.createOrder(_, order)
         }
       }
     });

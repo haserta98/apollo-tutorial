@@ -1,6 +1,6 @@
 import {DataSource, Repository} from "typeorm";
 import {inject, injectable} from "inversify";
-import LogGateway from "../../gateway/log.gateway";
+import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 import {UserEntity} from "@ecommerce/libs/src/entity/user.entity";
 import {UserAddressEntity} from "@ecommerce/libs/src/entity/user-address.entity";
 import LogBuilder from "@ecommerce/libs/src/log.builder";

@@ -1,16 +1,17 @@
 import {logger} from "../logger";
-import {injectable} from "inversify";
+import {inject, injectable} from "inversify";
 import * as amqp from "amqplib";
-import {IncomingMessage, SendingMessage} from "../domain/common";
+import {IncomingMessage, ReplyMessage, SendingMessage} from "../domain/common";
 import {Message} from "amqplib";
+import {RMQRpcClient, RpcClient} from "./RpcClient";
 
 @injectable()
 class RMQClient {
   private connection: amqp.ChannelModel;
   private channel: amqp.Channel | null = null;
-  private replyQueue = '';
-  private pendingReplies: Map<string, (response: any) => void> = new Map();
+  private readonly replyQueue = '';
   private readonly shardSize: number = 1;
+  private rpcClient: RpcClient;
 
   constructor() {
     this.shardSize = process.env.SHARD_COUNT ? +process.env.SHARD_COUNT : 1
@@ -32,39 +33,20 @@ class RMQClient {
       );
 
       this.channel = await this.connection.createChannel();
-
-      const {queue} = await this.channel.assertQueue('', {exclusive: true});
-      this.replyQueue = queue;
       await this.channel.prefetch(10);
-
-      await this.channel.consume(
+      this.rpcClient = new RMQRpcClient(
+        this.channel,
         this.replyQueue,
-        (msg) => {
+        this.shardSize
+      )
+      await this.rpcClient.initialize();
 
-          if (!msg) return;
-          const correlationId = msg.properties.correlationId;
-          const resolver = this.pendingReplies.get(correlationId);
-          if (resolver) {
-            const parsed = JSON.parse(msg.content.toString());
-            resolver(parsed);
-            this.pendingReplies.delete(correlationId);
-          }
-        },
-        {noAck: true}
-      );
 
       logger.info(`Connected to RabbitMQ. Reply queue: ${this.replyQueue}`);
     } catch (error) {
       logger.error("Failed to connect to RabbitMQ:", error);
       throw error;
     }
-  }
-
-  public getChannel(): amqp.Channel {
-    if (!this.channel) {
-      throw new Error("Channel not initialized. Call connect() first.");
-    }
-    return this.channel;
   }
 
   public getConnection(): amqp.ChannelModel {
@@ -74,20 +56,10 @@ class RMQClient {
     return this.connection;
   }
 
-  hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash << 5) - hash + str.charCodeAt(i);
-      hash |= 0; // convert to 32bit int
-    }
-    return Math.abs(hash);
-  }
-
-  public sendAndWait = async <T>(queue: string, message: SendingMessage<any>): Promise<SendingMessage<T>> => {
+  public sendAndWait = async <T>(queue: string, message: SendingMessage<any>): Promise<ReplyMessage<T>> => {
     if (!this.channel) {
       throw new Error("Channel not initialized. Call connect() first.");
     }
-
     if (!message || !message.type || !message.payload) {
       throw new Error("Invalid message format. Must contain type and payload.");
     }
@@ -100,28 +72,11 @@ class RMQClient {
     if (message.key.length === 0) {
       throw new Error("Message key cannot be an empty string.");
     }
-    const shard = this.hashString(message.key ?? "") % this.shardSize;
-    const keyedQueue = `${queue}_${shard}`;
-
-    const correlationId = this.generateCorrelationId();
-
-    return new Promise<SendingMessage<T>>((resolve, reject) => {
-      // Timeout fallback
-      const timeout = setTimeout(() => {
-        this.pendingReplies.delete(correlationId);
-        reject(new Error(`Timeout while waiting for response to correlationId: ${correlationId}`));
-      }, 5000);
-
-      this.pendingReplies.set(correlationId, (response) => {
-        clearTimeout(timeout);
-        resolve(response);
-      });
-
-      this.channel.sendToQueue(keyedQueue, Buffer.from(JSON.stringify(message)), {
-        correlationId,
-        replyTo: this.replyQueue,
-      });
-    });
+    return this.rpcClient.send<any, T>(
+      queue,
+      message,
+      +process.env.RPC_TIMEOUT_MS || 5000
+    )
   }
 
   public async reply(
@@ -141,9 +96,7 @@ class RMQClient {
     );
   }
 
-  private generateCorrelationId(): string {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
-  }
+
 }
 
 export default RMQClient;

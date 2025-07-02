@@ -4,10 +4,15 @@ import {inject, injectable} from "inversify";
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
 import * as amqp from "amqplib";
 import {QueueType, SubQueueType} from "@ecommerce/libs/src/constants/Queue";
-import OrderGetProcessor from "../processor/order.get.processor";
+import OrderGetByUserProcessor from "../processor/order.get_by_user.processor";
 import {IncomingMessage} from "@ecommerce/libs/src/domain/common";
+import OrderGetByIdProcessor from "../processor/order.get_by_id.processor";
+import {logger} from "@ecommerce/libs/src/logger";
+import OrderItemsByOrderIdProcessor from "../processor/order_items.get_by_order.processor";
+import OrderCreateProcessor from "../processor/order.create.processor";
+import {OrderCreateRequest} from "@ecommerce/libs/src/dto/order.dto";
 
-export type OrderMessagePayload = OrderEntity | number;
+export type OrderMessagePayload = OrderEntity | number | OrderCreateRequest;
 
 @injectable()
 class OrderSubscriber extends Subscriber<OrderMessagePayload> {
@@ -16,7 +21,10 @@ class OrderSubscriber extends Subscriber<OrderMessagePayload> {
   protected readonly QUEUE_NAME = QueueType.ORDER;
 
   constructor(@inject(RMQClient) protected readonly rmqClient: RMQClient,
-              @inject(OrderGetProcessor) private readonly orderGetProcessor: OrderGetProcessor) {
+              @inject(OrderGetByUserProcessor) private readonly orderGetProcessor: OrderGetByUserProcessor,
+              @inject(OrderGetByIdProcessor) private readonly orderGetByIdProcessor: OrderGetByIdProcessor,
+              @inject(OrderItemsByOrderIdProcessor) private readonly orderItemsByOrderIdProcessor: OrderItemsByOrderIdProcessor,
+              @inject(OrderCreateProcessor) private readonly orderCreateProcessor: OrderCreateProcessor) {
     super();
   }
 
@@ -31,6 +39,22 @@ class OrderSubscriber extends Subscriber<OrderMessagePayload> {
         await this.orderGetProcessor.process(payload as IncomingMessage<number>);
         break;
       }
+      case SubQueueType.GET_ORDER_BY_ID: {
+        await this.orderGetByIdProcessor.process(payload as IncomingMessage<number>);
+        break;
+      }
+      case SubQueueType.GET_ORDER_ITEMS_BY_ORDER_ID: {
+        await this.orderItemsByOrderIdProcessor.process(payload as IncomingMessage<number>);
+        break;
+      }
+      case SubQueueType.CREATE: {
+        await this.orderCreateProcessor.process(payload as IncomingMessage<OrderCreateRequest>);
+        break;
+      }
+      default:
+        logger.error(`No processor found for message type: ${payload.type}`);
+        await payload.reply(null)
+        break;
     }
   }
 }

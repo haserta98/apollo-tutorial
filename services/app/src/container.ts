@@ -3,12 +3,13 @@ import {DataSource} from "typeorm";
 import UserService from "./modules/user/user.service";
 import UserMutation from "./modules/user/user.mutation";
 import UserResolver from "./modules/user/user.resolver";
-import LogGateway from "./gateway/log.gateway";
+import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 import GraphqlBootstrapper from "./graphql.bootstrap";
 import {AppDataSource} from "@ecommerce/libs/src/data-source";
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
 import OrderGateway from "./gateway/order.gateway";
 import OrderResolver from "./modules/order/order.resolver";
+import OrderMutation from "./modules/order/order.mutation";
 
 class IoContainer extends IOContainer {
 
@@ -31,6 +32,7 @@ class IoContainer extends IOContainer {
     this.bind(UserResolver).toSelf()
     this.bind(OrderGateway).toSelf();
     this.bind(OrderResolver).toSelf();
+    this.bind(OrderMutation).toSelf();
     this.bind(LogGateway).toSelf();
   }
 

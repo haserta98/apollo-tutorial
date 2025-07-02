@@ -13,6 +13,11 @@ export interface SendingMessage<T> {
   payload: T;
 }
 
+export interface ReplyMessage<T> extends SendingMessage<T> {
+  type: string;
+  payload: T;
+}
+
 export class IncomingMessageBuilder<T> implements IncomingMessage<T> {
   key: string;
   rawMessage: Message;

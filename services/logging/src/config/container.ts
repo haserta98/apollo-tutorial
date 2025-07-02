@@ -1,12 +1,12 @@
 import {Container as IOContainer} from 'inversify';
 import {DataSource} from "typeorm";
-import PgGateway from "../logger/pg.logger";
 import LoggingBootstrapper from "./bootstrap";
 import LogProcessor from "../processor/log.processor";
 import LogSubscriber from "../subscriber/subscriber";
 import {AppDataSource} from "@ecommerce/libs/src/data-source";
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
 import LogManager from "../index/manager";
+import PgLogger from "../logger/pg.logger";
 
 class LogContainer extends IOContainer {
 
@@ -23,7 +23,7 @@ class LogContainer extends IOContainer {
   private init() {
     this.bind(DataSource).toConstantValue(AppDataSource);
     this.bind(RMQClient).toSelf();
-    this.bind(PgGateway).toSelf();
+    this.bind(PgLogger).toSelf();
     this.bind(LogManager).toSelf();
     this.bind(LogProcessor).toSelf();
     this.bind(LoggingBootstrapper).toSelf();
