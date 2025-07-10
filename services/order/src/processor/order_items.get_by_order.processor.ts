@@ -1,5 +1,5 @@
 import {Processor} from "@ecommerce/libs/src/common";
-import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order";
+import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order.entity";
 import {inject, injectable} from "inversify";
 import {DataSource} from "typeorm";
 import {IncomingMessage, SendingMessage} from "@ecommerce/libs/src/domain/common";

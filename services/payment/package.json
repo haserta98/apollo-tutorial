@@ -1,0 +1,16 @@
+{
+  "name": "@ecommerce/payment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@ecommerce/libs": "workspace:^"
+  }
+}

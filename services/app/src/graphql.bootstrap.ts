@@ -3,66 +3,39 @@ import {generateSchema} from "./typedef";
 import {startStandaloneServer} from "@apollo/server/standalone";
 import TypeDef from "./typedef_interface";
 import {inject, injectable} from "inversify";
-import UserMutation from "./modules/user/user.mutation";
-import UserResolver from "./modules/user/user.resolver";
-import UserTypeDef from "./modules/user/user.typedef";
-import {UserEntity} from "@ecommerce/libs/src/entity/user.entity";
-import {UserAddressEntity} from "@ecommerce/libs/src/entity/user-address.entity";
 import {logger} from "@ecommerce/libs/src/logger";
+import UserTypeDef from "./modules/user/user.typedef";
 import OrderTypeDef from "./modules/order/order.typedef";
-import OrderResolver from "./modules/order/order.resolver";
-import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order";
-import {OrderCreateRequest} from "@ecommerce/libs/src/dto/order.dto";
-import OrderMutation from "./modules/order/order.mutation";
 
 @injectable()
 class GraphqlBootstrapper {
 
-  constructor(@inject(UserResolver) private readonly userResolver: UserResolver,
-              @inject(UserMutation) private readonly userMutation: UserMutation,
-              @inject(OrderResolver) private readonly orderResolver: OrderResolver,
-              @inject(OrderMutation) private readonly orderMutation: OrderMutation
-  ) {
+  constructor(@inject(UserTypeDef) private readonly userTypeDef: UserTypeDef,
+              @inject(OrderTypeDef) private readonly orderTypeDef: OrderTypeDef) {
   }
 
   public async initialize() {
 
     const types: TypeDef[] = [
-      new UserTypeDef(),
-      new OrderTypeDef()
-    ]
-
+      this.userTypeDef,
+      this.orderTypeDef
+    ];
     const server = new ApolloServer({
       typeDefs: generateSchema(types),
       resolvers: {
         Query: {
-          users: () => this.userResolver.resolveUsers(),
-          user: (_, {id}) => this.userResolver.resolveUser(+id),
-          orders: (_, {userId}) => this.orderResolver.resolveOrders(+userId),
-          order: (_, {id}) => this.orderResolver.resolveOrder(+id),
-          orderItems: (_, {orderId}) => this.orderResolver.resolveOrderItems(+orderId),
+          ...types.reduce((prev, curr) => {
+            return {...prev, ...curr.getSchema().query};
+          }, {}),
         },
-        User: {
-          addresses: (user: UserEntity) => this.userResolver.resolveUserAddress(user.id),
-        },
-        UserAddress: {
-          user: (address: UserAddressEntity) => this.userResolver.resolveUser(address.user.id),
-        },
-        Order: {
-          items: (order: OrderEntity) => this.orderResolver.resolveOrderItems(+order.id),
-          user: (order: OrderEntity) => this.userResolver.resolveUser(+order.user.id),
-        },
-        OrderItem: {
-          order: (item: OrderItemEntity, args) => {
-            return this.orderResolver.resolveOrder(+item.order.id);
-          },
-        },
+        ...types.reduce((prev, curr) => {
+          return {...prev, ...curr.getSchema().otherResolvers};
+        }, {}),
         Mutation: {
-          createUser: (_: any, user: UserEntity) => this.userMutation.createUser(_, user),
-          createAddress: (_: any, address: UserAddressEntity) => this.userMutation.createAddress(_, address),
-          removeUser: (_: any, args) => this.userMutation.removeUser(_, +args.id),
-          createOrder: (_: any, order: OrderCreateRequest) => this.orderMutation.createOrder(_, order)
-        }
+          ...types.reduce((prev, curr) => {
+            return {...prev, ...curr.getSchema().mutation};
+          }, {}),
+        },
       }
     });
     const {url} = await startStandaloneServer(server, {

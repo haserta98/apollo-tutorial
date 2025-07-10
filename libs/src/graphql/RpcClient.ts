@@ -3,6 +3,7 @@ import {randomUUID} from 'crypto';
 import {Bootable} from "../common";
 import {SendingMessage} from "../domain/common";
 import {QueueType, queueWithShard} from "../constants/Queue";
+import RMQClient from "./RMQClient";
 
 export interface RpcClient extends Bootable {
   send<T = any, R = any>(queue: string, message: SendingMessage<T>, timeoutMs?: number): Promise<SendingMessage<R>>;
@@ -15,9 +16,9 @@ export class RMQRpcClient implements RpcClient {
   private correlationMap = new Map<string, RpcCallback>();
 
   constructor(
-    private channel: amqp.Channel,
+    private readonly channel: amqp.Channel,
     private replyQueue: string,
-    private shardSize: number = 1
+    private readonly shardSize: number = 1
   ) {
   }
 
@@ -32,7 +33,7 @@ export class RMQRpcClient implements RpcClient {
     return new Promise<R>((resolve, reject) => {
       this.correlationMap.set(correlationId, resolve);
 
-      const keyedQueue = queueWithShard(queue, message.key.toString(),this.shardSize);
+      const keyedQueue = queueWithShard(queue, message.key.toString(), this.shardSize);
       this.channel.sendToQueue(keyedQueue, Buffer.from(JSON.stringify(message)), {
         correlationId,
         replyTo: this.replyQueue,
@@ -62,14 +63,5 @@ export class RMQRpcClient implements RpcClient {
       },
       {noAck: true}
     );
-  }
-
-  hashString(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash << 5) - hash + str.charCodeAt(i);
-      hash |= 0;
-    }
-    return Math.abs(hash);
   }
 }

@@ -9,6 +9,7 @@ import OrderGetByIdProcessor from "../processor/order.get_by_id.processor";
 import OrderItemsByOrderIdProcessor from "../processor/order_items.get_by_order.processor";
 import OrderCreateProcessor from "../processor/order.create.processor";
 import LogGateway from "@ecommerce/libs/src/common/log.gateway";
+import PaymentGateway from "../gateway/payment.gateway";
 
 class OrderContainer extends IOContainer {
 
@@ -32,6 +33,7 @@ class OrderContainer extends IOContainer {
     this.bind(OrderItemsByOrderIdProcessor).toSelf();
     this.bind(OrderCreateProcessor).toSelf();
     this.bind(LogGateway).toSelf();
+    this.bind(PaymentGateway).toSelf();
   }
 
   public static getInstance(): OrderContainer {

@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn
 } from "typeorm";
 import {UserEntity} from "./user.entity";
+import PaymentEntity from "./payment.entity";
 
 @Entity("orders")
 export class OrderEntity {
@@ -25,6 +26,9 @@ export class OrderEntity {
 
   @ManyToOne(() => UserEntity, user => user.orders)
   user: UserEntity
+
+  @OneToMany(() => PaymentEntity, payment => payment.order)
+  payments: PaymentEntity[]
 
   @CreateDateColumn()
   createdAt: Date;

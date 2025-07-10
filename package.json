@@ -8,7 +8,8 @@
   "scripts": {
     "start:log": "pnpm --filter @ecommerce/logging dev",
     "start:app": "pnpm --filter @ecommerce/app dev",
-    "start:order": "pnpm --filter @ecommerce/order dev"
+    "start:order": "pnpm --filter @ecommerce/order dev",
+    "start:payment": "pnpm --filter @ecommerce/payment dev"
   },
   "dependencies": {
     "inversify": "^7.0.0-alpha.5",
@@ -16,7 +17,9 @@
     "amqplib": "^0.10.8",
     "winston": "^3.17.0",
     "dotenv": "^17.0.0",
-    "typeorm": "0.3.25"
+    "typeorm": "0.3.25",
+    "pg": "^8.14.1",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
@@ -24,7 +27,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "@types/amqplib": "^0.10.7",
-    "@types/dotenv": "^6.1.1",
-    "@types/inversify": "^2.0.32"
+    "@types/dotenv": "^6.1.1"
   }
 }

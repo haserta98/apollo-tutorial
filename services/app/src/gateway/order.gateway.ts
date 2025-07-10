@@ -1,9 +1,9 @@
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
 import {inject, injectable} from "inversify";
 import {QueueType, SubQueueType} from "@ecommerce/libs/src/constants/Queue";
-import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order";
+import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order.entity";
 import {SendingMessage} from "@ecommerce/libs/src/domain/common";
-import {OrderCreateRequest} from "@ecommerce/libs/src/dto/order.dto";
+import {OrderCreateRequest, OrderCreateResponse} from "@ecommerce/libs/src/dto/order.dto";
 
 @injectable()
 class OrderGateway {
@@ -17,7 +17,7 @@ class OrderGateway {
       payload: userId,
       key: userId.toString()
     }
-    const incoming = await this.client.sendAndWait<OrderEntity[]>(
+    const incoming = await this.client.sendAndWait<number, OrderEntity[]>(
       QueueType.ORDER,
       msg
     )
@@ -30,7 +30,7 @@ class OrderGateway {
       payload: orderId,
       key: orderId.toString()
     }
-    const incoming = await this.client.sendAndWait<OrderItemEntity[]>(
+    const incoming = await this.client.sendAndWait<number, OrderItemEntity[]>(
       QueueType.ORDER,
       msg
     )
@@ -43,20 +43,20 @@ class OrderGateway {
       payload: orderId,
       key: orderId.toString()
     }
-    const incoming = await this.client.sendAndWait<OrderEntity>(
+    const incoming = await this.client.sendAndWait<number, OrderEntity>(
       QueueType.ORDER,
       msg
     )
     return incoming.payload;
   }
 
-  async createOrder(order: OrderCreateRequest): Promise<number> {
+  async createOrder(order: OrderCreateRequest): Promise<OrderCreateResponse> {
     const msg: SendingMessage<OrderCreateRequest> = {
       type: SubQueueType.CREATE,
       payload: order,
       key: order.userId.toString()
     }
-    const incoming = await this.client.sendAndWait<number>(
+    const incoming = await this.client.sendAndWait<OrderCreateRequest, OrderCreateResponse>(
       QueueType.ORDER,
       msg
     )

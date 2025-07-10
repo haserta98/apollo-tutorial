@@ -1,5 +1,5 @@
 import {logger} from "../logger";
-import {inject, injectable} from "inversify";
+import {injectable} from "inversify";
 import * as amqp from "amqplib";
 import {IncomingMessage, ReplyMessage, SendingMessage} from "../domain/common";
 import {Message} from "amqplib";
@@ -33,16 +33,14 @@ class RMQClient {
       );
 
       this.channel = await this.connection.createChannel();
-      await this.channel.prefetch(10);
+      await this.channel.prefetch(1);
       this.rpcClient = new RMQRpcClient(
         this.channel,
         this.replyQueue,
         this.shardSize
       )
       await this.rpcClient.initialize();
-
-
-      logger.info(`Connected to RabbitMQ. Reply queue: ${this.replyQueue}`);
+      logger.info("Connected to RabbitMQ");
     } catch (error) {
       logger.error("Failed to connect to RabbitMQ:", error);
       throw error;
@@ -56,7 +54,31 @@ class RMQClient {
     return this.connection;
   }
 
-  public sendAndWait = async <T>(queue: string, message: SendingMessage<any>): Promise<ReplyMessage<T>> => {
+  public send = async <TRequest = any>(queue: string, message: SendingMessage<TRequest>, channel: amqp.Channel = this.channel): Promise<void> => {
+    if (!channel) {
+      throw new Error("Channel not initialized. Call connect() first.");
+    }
+    if (!message || !message.type || !message.payload) {
+      throw new Error("Invalid message format. Must contain type and payload.");
+    }
+    if (!queue) {
+      throw new Error("Queue name must be provided.");
+    }
+    if (typeof message.key !== 'string') {
+      throw new Error("Message key must be a string.");
+    }
+    if (message.key.length === 0) {
+      throw new Error("Message key cannot be an empty string.");
+    }
+
+    const msgBuffer = Buffer.from(JSON.stringify(message));
+    channel.sendToQueue(queue, msgBuffer, {
+      persistent: true,
+      correlationId: message.key
+    });
+  }
+
+  public sendAndWait = async <TRequest = any, TResponse = any>(queue: string, message: SendingMessage<TRequest>, timeout: number = +process.env.RPC_TIMEOUT_MS || 5000): Promise<ReplyMessage<TResponse>> => {
     if (!this.channel) {
       throw new Error("Channel not initialized. Call connect() first.");
     }
@@ -72,10 +94,10 @@ class RMQClient {
     if (message.key.length === 0) {
       throw new Error("Message key cannot be an empty string.");
     }
-    return this.rpcClient.send<any, T>(
+    return this.rpcClient.send<TRequest, TResponse>(
       queue,
       message,
-      +process.env.RPC_TIMEOUT_MS || 5000
+      timeout
     )
   }
 

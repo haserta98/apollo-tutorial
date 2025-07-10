@@ -26,7 +26,7 @@ export abstract class Subscriber<TPayload> implements Bootable {
   protected readonly shardSize: number;
 
   protected constructor() {
-    this.shardSize = process.env.SHARD_COUNT ? +process.env.SHARD_COUNT : 1;
+    this.shardSize = process.env.RMQ_CLIENT_PREFETCH_COUNT ? +process.env.RMQ_CLIENT_PREFETCH_COUNT : 1;
   }
 
   protected async subscribe(): Promise<void> {
@@ -37,10 +37,10 @@ export abstract class Subscriber<TPayload> implements Bootable {
 
   private async startShard(shard: number) {
     const channel = await this.rmqClient.getConnection().createChannel();
-    await channel.prefetch(5);
+    await channel.prefetch(1);
     const queueName = `${this.QUEUE_NAME}_${shard}`;
     await channel.assertQueue(queueName, {
-      durable: false,
+      durable: true,
     });
     await channel.consume(queueName, (msg) => {
       this.handleMessage(msg, channel);

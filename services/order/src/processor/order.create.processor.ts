@@ -1,9 +1,9 @@
 import {Processor} from "@ecommerce/libs/src/common";
 import {IncomingMessage, SendingMessage} from "@ecommerce/libs/src/domain/common";
-import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order";
+import {OrderEntity, OrderItemEntity} from "@ecommerce/libs/src/entity/order.entity";
 import {inject, injectable} from "inversify";
 import {DataSource} from "typeorm";
-import {OrderCreateRequest} from "@ecommerce/libs/src/dto/order.dto";
+import {OrderCreateRequest, OrderCreateResponse} from "@ecommerce/libs/src/dto/order.dto";
 import {UserEntity} from "@ecommerce/libs/src/entity/user.entity";
 import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 import LogBuilder from "@ecommerce/libs/src/log.builder";
@@ -13,7 +13,8 @@ import {logger} from "@ecommerce/libs/src/logger";
 class OrderCreateProcessor implements Processor<OrderCreateRequest> {
 
   constructor(@inject(DataSource) private readonly datasource: DataSource,
-              @inject(LogGateway) private readonly logGateway: LogGateway) {
+              @inject(LogGateway) private readonly logGateway: LogGateway
+  ) {
   }
 
   async process(payload: IncomingMessage<OrderCreateRequest>): Promise<void> {
@@ -21,21 +22,16 @@ class OrderCreateProcessor implements Processor<OrderCreateRequest> {
     const order = this.buildOrder(payload.payload);
     const orderEntity = orderRepository.create(order);
     const saved = await orderRepository.save(orderEntity);
-    const sendingMessage: SendingMessage<OrderEntity> = {
+    const sendingMessage: SendingMessage<OrderCreateResponse> = {
       type: "ORDER_CREATED",
-      payload: saved,
+      payload: {
+        id: saved.id
+      },
       key: payload.payload.userId.toString()
     }
     await payload.reply(sendingMessage);
 
-    const createLog = LogBuilder.builder()
-      .withType("ORDER_CREATED")
-      .withOwner(order.user.id.toString())
-      .withMessage("Order created successfully")
-      .build();
-    this.logGateway.send(createLog).then().catch((err) => {
-      logger.error("Failed to send log:", err);
-    });
+    this.saveOrderLog(order);
   }
 
   private buildOrder(order: OrderCreateRequest) {
@@ -55,6 +51,18 @@ class OrderCreateProcessor implements Processor<OrderCreateRequest> {
     return orderEntity;
   }
 
+  private saveOrderLog(order: OrderEntity) {
+    const createLog = LogBuilder.builder()
+      .withType("ORDER_CREATED")
+      .withOwner(order.user.id.toString())
+      .withMessage("Order created successfully")
+      .build();
+    this.logGateway
+      .send(createLog)
+      .catch((err) => {
+        logger.error("Failed to send log:", err);
+      });
+  }
 }
 
 export default OrderCreateProcessor;

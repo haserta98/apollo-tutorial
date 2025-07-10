@@ -1,11 +1,15 @@
-export class OrderCreateRequest {
+export interface OrderCreateRequest {
   items: OrderItemCreateRequest[];
   userId: number;
 }
 
-export class OrderItemCreateRequest {
+interface OrderItemCreateRequest {
   productId: number;
   productName: string;
   price: number;
   quantity: number;
+}
+
+export interface OrderCreateResponse {
+  id: number;
 }

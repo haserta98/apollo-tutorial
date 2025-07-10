@@ -4,10 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  DeleteDateColumn, OneToMany
+  DeleteDateColumn, OneToMany, ManyToOne
 } from "typeorm"
-import {UserAddressEntity} from "./user-address.entity";
-import {OrderEntity} from "./order";
+import {OrderEntity} from "./order.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -38,4 +37,41 @@ export class UserEntity {
 
   @OneToMany(() => OrderEntity, order => order.user, {cascade: true})
   orders: OrderEntity[]
+}
+
+@Entity("user_addresses")
+export class UserAddressEntity {
+
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  city: string;
+
+  @Column()
+  street: string;
+
+  @Column()
+  houseNumber: string;
+
+  @Column({nullable: true})
+  postalCode: string;
+
+  @Column({nullable: true})
+  additionalInfo: string;
+
+  @Column({default: true})
+  isActive: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
+
+  @ManyToOne(() => UserEntity, user => user.addresses)
+  user: UserEntity;
 }

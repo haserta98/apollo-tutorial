@@ -1,6 +1,7 @@
 export enum QueueType {
   LOG = "log",
   ORDER = "order",
+  PAYMENT = "payment",
 }
 
 export enum SubQueueType {

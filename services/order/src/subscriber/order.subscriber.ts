@@ -1,5 +1,5 @@
 import {Subscriber} from "@ecommerce/libs/src/common";
-import {OrderEntity} from "@ecommerce/libs/src/entity/order";
+import {OrderEntity} from "@ecommerce/libs/src/entity/order.entity";
 import {inject, injectable} from "inversify";
 import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
 import * as amqp from "amqplib";
