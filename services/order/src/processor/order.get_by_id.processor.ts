@@ -3,7 +3,7 @@ import {OrderEntity} from "@ecommerce/libs/src/entity/order.entity";
 import {inject, injectable} from "inversify";
 import {DataSource} from "typeorm";
 import {IncomingMessage, SendingMessage} from "@ecommerce/libs/src/domain/common";
-import {SubQueueType} from "@ecommerce/libs/src/constants/Queue";
+import {SubQueueType} from "@ecommerce/libs/src/constants/queue";
 
 @injectable()
 class OrderGetByIdProcessor implements Processor<number> {

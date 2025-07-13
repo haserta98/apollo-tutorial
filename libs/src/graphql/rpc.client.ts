@@ -2,8 +2,8 @@ import * as amqp from 'amqplib';
 import {randomUUID} from 'crypto';
 import {Bootable} from "../common";
 import {SendingMessage} from "../domain/common";
-import {QueueType, queueWithShard} from "../constants/Queue";
-import RMQClient from "./RMQClient";
+import {QueueType, queueWithShard} from "../constants/queue";
+import RmqClient from "./rmq.client";
 
 export interface RpcClient extends Bootable {
   send<T = any, R = any>(queue: string, message: SendingMessage<T>, timeoutMs?: number): Promise<SendingMessage<R>>;

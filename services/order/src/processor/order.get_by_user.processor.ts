@@ -2,8 +2,12 @@ import {Processor} from "@ecommerce/libs/src/common";
 import {OrderEntity} from "@ecommerce/libs/src/entity/order.entity";
 import {inject, injectable} from "inversify";
 import {DataSource} from "typeorm";
-import {IncomingMessage, SendingMessage} from "@ecommerce/libs/src/domain/common";
-import {SubQueueType} from "@ecommerce/libs/src/constants/Queue";
+import {
+  IncomingMessage,
+  SendingMessage,
+  SendingMessageBuilder
+} from "@ecommerce/libs/src/domain/common";
+import {SubQueueType} from "@ecommerce/libs/src/constants/queue";
 
 @injectable()
 class OrderGetByUserProcessor implements Processor<number> {
@@ -21,11 +25,11 @@ class OrderGetByUserProcessor implements Processor<number> {
       },
       relations: ["user"]
     });
-    const sendingMessage: SendingMessage<OrderEntity[]> = {
-      type: SubQueueType.GET_ORDER_BY_USER_ID,
-      payload: orders,
-      key: payload.payload.toString()
-    }
+    const sendingMessage: SendingMessage<OrderEntity[]> = SendingMessageBuilder.builder<OrderEntity[]>()
+      .withType(SubQueueType.GET_ORDER_BY_USER_ID)
+      .withKey(payload.payload.toString())
+      .withPayload(orders)
+      .build();
     await payload.reply(sendingMessage);
   }
 }

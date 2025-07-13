@@ -3,7 +3,6 @@ import * as dotenv from "dotenv";
 import {DataSource} from "typeorm";
 import PaymentContainer from "./config/container";
 import PaymentBootstrapper from "./config/bootstrap";
-import {SocketIoManager} from "@ecommerce/libs/src/socket/socket.io-manager";
 
 class PaymentService {
 

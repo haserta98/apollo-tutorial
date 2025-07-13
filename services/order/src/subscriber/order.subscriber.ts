@@ -1,9 +1,9 @@
 import {Subscriber} from "@ecommerce/libs/src/common";
 import {OrderEntity} from "@ecommerce/libs/src/entity/order.entity";
 import {inject, injectable} from "inversify";
-import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import RmqClient from "@ecommerce/libs/src/graphql/rmq.client";
 import * as amqp from "amqplib";
-import {QueueType, SubQueueType} from "@ecommerce/libs/src/constants/Queue";
+import {QueueType, SubQueueType} from "@ecommerce/libs/src/constants/queue";
 import OrderGetByUserProcessor from "../processor/order.get_by_user.processor";
 import {IncomingMessage} from "@ecommerce/libs/src/domain/common";
 import OrderGetByIdProcessor from "../processor/order.get_by_id.processor";
@@ -18,14 +18,12 @@ export type OrderMessagePayload = OrderEntity | number | OrderCreateRequest;
 class OrderSubscriber extends Subscriber<OrderMessagePayload> {
 
   protected channel: amqp.Channel;
-  protected readonly QUEUE_NAME = QueueType.ORDER;
 
-  constructor(@inject(RMQClient) protected readonly rmqClient: RMQClient,
-              @inject(OrderGetByUserProcessor) private readonly orderGetProcessor: OrderGetByUserProcessor,
+  constructor(@inject(OrderGetByUserProcessor) private readonly orderGetProcessor: OrderGetByUserProcessor,
               @inject(OrderGetByIdProcessor) private readonly orderGetByIdProcessor: OrderGetByIdProcessor,
               @inject(OrderItemsByOrderIdProcessor) private readonly orderItemsByOrderIdProcessor: OrderItemsByOrderIdProcessor,
               @inject(OrderCreateProcessor) private readonly orderCreateProcessor: OrderCreateProcessor) {
-    super();
+    super(QueueType.ORDER);
   }
 
   public async initialize(): Promise<void> {

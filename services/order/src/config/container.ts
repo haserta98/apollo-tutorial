@@ -1,7 +1,7 @@
 import {Container as IOContainer} from 'inversify';
 import {DataSource} from "typeorm";
 import {AppDataSource} from "@ecommerce/libs/src/data-source";
-import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import RmqClient from "@ecommerce/libs/src/graphql/rmq.client";
 import OrderBootstrapper from "./bootstrap";
 import OrderSubscriber from "../subscriber/order.subscriber";
 import OrderGetByUserProcessor from "../processor/order.get_by_user.processor";
@@ -25,7 +25,7 @@ class OrderContainer extends IOContainer {
 
   private init() {
     this.bind(DataSource).toConstantValue(AppDataSource);
-    this.bind(RMQClient).toSelf();
+    this.bind(RmqClient).toSelf();
     this.bind(OrderBootstrapper).toSelf();
     this.bind(OrderSubscriber).toSelf();
     this.bind(OrderGetByUserProcessor).toSelf();

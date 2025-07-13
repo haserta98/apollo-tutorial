@@ -6,7 +6,7 @@ import UserResolver from "./modules/user/user.resolver";
 import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 import GraphqlBootstrapper from "./graphql.bootstrap";
 import {AppDataSource} from "@ecommerce/libs/src/data-source";
-import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import RmqClient from "@ecommerce/libs/src/graphql/rmq.client";
 import OrderGateway from "./gateway/order.gateway";
 import OrderResolver from "./modules/order/order.resolver";
 import OrderMutation from "./modules/order/order.mutation";
@@ -25,7 +25,7 @@ class IoContainer extends IOContainer {
 
   private init() {
     this.bind(DataSource).toConstantValue(AppDataSource);
-    this.bind(RMQClient).toSelf();
+    this.bind(RmqClient).toSelf();
     this.bind(GraphqlBootstrapper).toSelf()
     this.bind(UserService).toSelf()
     this.bind(UserMutation).toSelf()

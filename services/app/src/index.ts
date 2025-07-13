@@ -4,7 +4,7 @@ import * as dotenv from "dotenv"
 import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 import IoContainer from "./container";
 import GraphqlBootstrapper from "./graphql.bootstrap";
-import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import RmqClient from "@ecommerce/libs/src/graphql/rmq.client";
 import {logger} from "@ecommerce/libs/src/logger";
 
 class Application {
@@ -34,7 +34,7 @@ class Application {
     }
 
     try {
-      const client: RMQClient = IoContainer.getInstance().get(RMQClient)
+      const client: RmqClient = IoContainer.getInstance().get(RmqClient)
       await client.connect();
     } catch (e) {
       logger.error("Error connecting to RabbitMQ:", e);

@@ -1,9 +1,14 @@
 import Log from "./domain/log";
 import * as amqp from "amqplib";
 import {logger} from "./logger";
-import {IncomingMessage, IncomingMessageBuilder, SendingMessage} from "./domain/common";
-import RMQClient from "./graphql/RMQClient";
-import {QueueType, queueWithShard} from "./constants/Queue";
+import {
+  IncomingMessage,
+  IncomingMessageBuilder,
+  SendingMessage,
+  SendingMessageBuilder
+} from "./domain/common";
+import RmqClient from "./graphql/rmq.client";
+import {QueueType, queueWithShard} from "./constants/queue";
 
 export interface Bootable {
   initialize(): Promise<void>;
@@ -21,11 +26,12 @@ export interface Logger {
 
 export abstract class Subscriber<TPayload> implements Bootable {
 
-  protected rmqClient: RMQClient;
+  protected rmqClient: RmqClient;
   protected QUEUE_NAME: QueueType;
   protected readonly shardSize: number;
 
-  protected constructor() {
+  protected constructor(queueName: QueueType) {
+    this.QUEUE_NAME = queueName;
     this.shardSize = process.env.RMQ_CLIENT_PREFETCH_COUNT ? +process.env.RMQ_CLIENT_PREFETCH_COUNT : 1;
   }
 
@@ -59,7 +65,7 @@ export abstract class Subscriber<TPayload> implements Bootable {
       return;
     }
     try {
-      const payload: SendingMessage<any> = JSON.parse(message.content.toString());
+      const payload: SendingMessage<any> = SendingMessageBuilder.from(message.content.toString())
       const incomingMessage: IncomingMessage<TPayload> = IncomingMessageBuilder.create(
         this.rmqClient,
         message,

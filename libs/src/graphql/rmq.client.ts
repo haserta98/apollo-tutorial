@@ -3,10 +3,11 @@ import {injectable} from "inversify";
 import * as amqp from "amqplib";
 import {IncomingMessage, ReplyMessage, SendingMessage} from "../domain/common";
 import {Message} from "amqplib";
-import {RMQRpcClient, RpcClient} from "./RpcClient";
+import {RMQRpcClient, RpcClient} from "./rpc.client";
+import {QueueType, queueWithShard} from "../constants/queue";
 
 @injectable()
-class RMQClient {
+class RmqClient {
   private connection: amqp.ChannelModel;
   private channel: amqp.Channel | null = null;
   private readonly replyQueue = '';
@@ -54,7 +55,7 @@ class RMQClient {
     return this.connection;
   }
 
-  public send = async <TRequest = any>(queue: string, message: SendingMessage<TRequest>, channel: amqp.Channel = this.channel): Promise<void> => {
+  public send = async <TRequest = any>(queue: QueueType, message: SendingMessage<TRequest>, channel: amqp.Channel = this.channel): Promise<void> => {
     if (!channel) {
       throw new Error("Channel not initialized. Call connect() first.");
     }
@@ -71,8 +72,9 @@ class RMQClient {
       throw new Error("Message key cannot be an empty string.");
     }
 
+    const keyedQueue = queueWithShard(queue, message.key.toString(), this.shardSize);
     const msgBuffer = Buffer.from(JSON.stringify(message));
-    channel.sendToQueue(queue, msgBuffer, {
+    channel.sendToQueue(keyedQueue, msgBuffer, {
       persistent: true,
       correlationId: message.key
     });
@@ -121,4 +123,4 @@ class RMQClient {
 
 }
 
-export default RMQClient;
+export default RmqClient;

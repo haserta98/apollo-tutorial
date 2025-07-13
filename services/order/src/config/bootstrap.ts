@@ -1,12 +1,12 @@
 import {inject, injectable} from "inversify";
-import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import RmqClient from "@ecommerce/libs/src/graphql/rmq.client";
 import OrderSubscriber from "../subscriber/order.subscriber";
 import LogGateway from "@ecommerce/libs/src/common/log.gateway";
 
 @injectable()
 class OrderBootstrapper {
 
-  constructor(@inject(RMQClient) private readonly rmqClient: RMQClient,
+  constructor(@inject(RmqClient) private readonly rmqClient: RmqClient,
               @inject(OrderSubscriber) private readonly orderSubscriber: OrderSubscriber,
               @inject(LogGateway) private readonly logGateway: LogGateway,) {
   }

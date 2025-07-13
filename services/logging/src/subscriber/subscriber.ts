@@ -3,8 +3,8 @@ import * as amqp from "amqplib";
 import LogProcessor from "../processor/log.processor";
 import {Subscriber} from "@ecommerce/libs/src/common";
 import Log from "@ecommerce/libs/src/domain/log";
-import {QueueType} from "@ecommerce/libs/src/constants/Queue";
-import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import {QueueType} from "@ecommerce/libs/src/constants/queue";
+import RmqClient from "@ecommerce/libs/src/graphql/rmq.client";
 import {logger} from "@ecommerce/libs/src/logger";
 import {IncomingMessage} from "@ecommerce/libs/src/domain/common";
 
@@ -12,11 +12,10 @@ import {IncomingMessage} from "@ecommerce/libs/src/domain/common";
 class LogSubscriber extends Subscriber<Log> {
 
   protected channel: amqp.Channel;
-  protected QUEUE_NAME = QueueType.LOG;
 
-  constructor(@inject(RMQClient) protected readonly rmqClient: RMQClient,
+  constructor(@inject(RmqClient) protected readonly rmqClient: RmqClient,
               @inject(LogProcessor) private readonly logProcessor: LogProcessor) {
-    super();
+    super(QueueType.LOG);
   }
 
   public async initialize() {

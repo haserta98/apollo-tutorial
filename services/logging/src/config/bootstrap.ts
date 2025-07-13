@@ -1,6 +1,6 @@
 import LogProcessor from "../processor/log.processor";
 import {inject, injectable} from "inversify";
-import RMQClient from "@ecommerce/libs/src/graphql/RMQClient";
+import RmqClient from "@ecommerce/libs/src/graphql/rmq.client";
 import {Bootable} from "@ecommerce/libs/src/common";
 import LogSubscriber from "../subscriber/subscriber";
 
@@ -9,7 +9,7 @@ class LoggingBootstrapper {
 
   constructor(@inject(LogProcessor) private readonly logProcessor: Bootable,
               @inject(LogSubscriber) private readonly logSubscriber: LogSubscriber,
-              @inject(RMQClient) private readonly rmqClient: RMQClient) {
+              @inject(RmqClient) private readonly rmqClient: RmqClient) {
   }
 
   async initialize() {

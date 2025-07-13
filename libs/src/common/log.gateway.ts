@@ -1,21 +1,19 @@
 import {inject, injectable} from "inversify";
 import * as amqp from "amqplib"
 import {Bootable} from "../common";
-import {QueueType, queueWithShard} from "../constants/Queue";
-import RMQClient from "../graphql/RMQClient";
+import {QueueType} from "../constants/queue";
+import RmqClient from "../graphql/rmq.client";
 import {logger} from "../logger";
 import Log from "../domain/log";
-import {SendingMessage} from "../domain/common";
+import {SendingMessage, SendingMessageBuilder} from "../domain/common";
 
 @injectable()
 class LogGateway implements Bootable {
 
   private channel: amqp.Channel;
   private QUEUE: QueueType = QueueType.LOG;
-  private readonly shardSize: number;
 
-  constructor(@inject(RMQClient) private readonly rmqClient: RMQClient) {
-    this.shardSize = process.env.SHARD_COUNT ? +process.env.SHARD_COUNT : 1;
+  constructor(@inject(RmqClient) private readonly rmqClient: RmqClient) {
   }
 
   public async initialize() {
@@ -31,13 +29,12 @@ class LogGateway implements Bootable {
 
   public async send(log: Log) {
     try {
-      const payload: SendingMessage<Log> = {
-        type: "log",
-        payload: log,
-        key: log.owner
-      }
-      const keyedQueue = queueWithShard(this.QUEUE, payload.key.toString(), this.shardSize);
-      await this.rmqClient.send(keyedQueue, payload, this.channel)
+      const payload: SendingMessage<Log> = SendingMessageBuilder.builder<Log>()
+        .withPayload(log)
+        .withKey(log.owner)
+        .withType("log")
+        .build();
+      await this.rmqClient.send(this.QUEUE, payload, this.channel)
     } catch (error) {
       console.error("Failed to send log to queue:", error);
     }

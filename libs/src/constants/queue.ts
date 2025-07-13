@@ -1,7 +1,7 @@
 export enum QueueType {
   LOG = "log",
   ORDER = "order",
-  PAYMENT = "payment",
+  PAYMENT_CREATE = "payment.create",
 }
 
 export enum SubQueueType {
@@ -9,6 +9,7 @@ export enum SubQueueType {
   GET_ORDER_ITEMS_BY_ORDER_ID = "orders.get.items.by.order_id",
   GET_ORDER_BY_ID = "orders.get.by.id",
   CREATE = "orders.create",
+  PAYMENT_CREATE = "payment.create",
 }
 
 export const queueWithShard = (queue: QueueType, key: string, shardSize: number): string => {
